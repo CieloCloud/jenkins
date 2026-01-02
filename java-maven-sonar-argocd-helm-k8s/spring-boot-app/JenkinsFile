@@ -34,7 +34,7 @@ pipeline {
         }
 
         stage('SonarQube') {
-            when { expression { return false } } // enable when ready
+            when { anyOf { branch 'main'; changeRequest() } }
             steps {
                 dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
                     sh '''
