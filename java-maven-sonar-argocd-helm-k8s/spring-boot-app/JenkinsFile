@@ -17,7 +17,7 @@ pipeline {
         stage('Build and Test') {
             agent {
                 docker {
-                    image 'image 'maven:3.8.6-openjdk-11'
+                    image 'maven:3.8.6-openjdk-11'
                     // share docker socket (for later stages) and Maven cache
                     args "-v /var/run/docker.sock:/var/run/docker.sock -v ${MAVEN_CACHE}:/root/.m2"
                 }
