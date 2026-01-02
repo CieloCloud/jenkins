@@ -41,18 +41,22 @@ stage('SonarQube Analysis') {
             args "--network=host -v ${MAVEN_CACHE}:/root/.m2"
         }
     }
+    environment {
+        SONAR_USER_HOME = "${WORKSPACE}/.sonar"
+    }
     steps {
         dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
             sh '''
-              mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+              mkdir -p ${SONAR_USER_HOME}
+              mvn org.sonarsource.scanner.maven:sonar-maven-plugin:5.5.0.6356:sonar \
                 -Dsonar.projectKey=spring-boot-demo \
                 -Dsonar.projectName=spring-boot-demo \
-                -Dsonar.host.url=http://localhost:9000 \
-                -Dsonar.login=${SONAR_TOKEN}
+                -Dsonar.host.url=http://localhost:9000
             '''
         }
     }
 }
+
 
 
         stage('Docker Build') {
