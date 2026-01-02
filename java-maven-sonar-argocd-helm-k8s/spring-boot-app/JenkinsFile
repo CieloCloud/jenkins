@@ -33,19 +33,18 @@ pipeline {
             }
         }
 
-        stage('SonarQube') {
-            when { anyOf { branch 'main'; changeRequest() } }
-            steps {
-                dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
-                    sh '''
-                      mvn sonar:sonar \
-                        -Dsonar.projectKey=spring-boot-demo \
-                        -Dsonar.host.url=http://host.docker.internal:9000 \
-                        -Dsonar.login=${SONAR_TOKEN}
-                    '''
-                }
-            }
+      stage('SonarQube') {
+    steps {
+        dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
+            sh '''
+              mvn sonar:sonar \
+                -Dsonar.projectKey=spring-boot-demo \
+                -Dsonar.host.url=http://localhost:9000 \
+                -Dsonar.login=${SONAR_TOKEN}
+            '''
         }
+    }
+}
 
         stage('Docker Build') {
             when { expression { return false } } // enable when you add Dockerfile
