@@ -81,7 +81,7 @@ stage('Update Deployment File') {
         DEPLOYMENT_FILE = "java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
     }
     steps {
-        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+        withCredentials([string(credentialsId: 'Github', variable: 'GITHUB_TOKEN')]) {
             sh '''
               echo "Configuring Git identity"
               git config user.email "akashsuryawanshi251@gmail.com"
