@@ -15,36 +15,6 @@ pipeline {
             }
         }
 
-      stage('Build and Push Docker Image') {
-    environment {
-        DOCKER_IMAGE = "cielocloud/jenkins:${BUILD_NUMBER}"
-    }
-    steps {
-        withCredentials([usernamePassword(
-            credentialsId: 'docker-cred',
-            usernameVariable: 'DOCKER_USERNAME',
-            passwordVariable: 'DOCKER_PASSWORD'
-        )]) {
-            script {
-                sh '''
-                  echo "Logging in to Docker Hub"
-                  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
-                  echo "Building Docker image"
-                  cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
-                  docker build -t ${DOCKER_IMAGE} .
-
-                  echo "Pushing Docker image"
-                  docker push ${DOCKER_IMAGE}
-
-                  echo "Docker images on Jenkins node:"
-                  docker images | grep ultimate-cicd || true
-                '''
-            }
-        }
-    }
-}
-
 
 stage('SonarQube Analysis') {
     agent {
@@ -68,19 +38,38 @@ stage('SonarQube Analysis') {
         }
     }
 }
+stage('Build and Push Docker Image') {
+    environment {
+        DOCKER_IMAGE = "cielocloud/jenkins:${BUILD_NUMBER}"
+    }
+    steps {
+        withCredentials([usernamePassword(
+            credentialsId: 'docker-cred',
+            usernameVariable: 'DOCKER_USERNAME',
+            passwordVariable: 'DOCKER_PASSWORD'
+        )]) {
+            sh '''
+              echo "Login to Docker Hub"
+              echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
+              cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
 
+              echo "Building JAR on Jenkins node"
+              mvn clean package -DskipTests
 
-        stage('Docker Build') {
-            when { expression { return false } } // enable when you add Dockerfile
-            steps {
-                dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
-                    sh '''
-                      docker build -t yourrepo/spring-boot-demo:${BUILD_NUMBER} .
-                    '''
-                }
-            }
+              echo "Verify JAR exists"
+              ls -ltr target/
+
+              echo "Building Docker image"
+              docker build -t ${DOCKER_IMAGE} .
+
+              echo "Pushing Docker image"
+              docker push ${DOCKER_IMAGE}
+            '''
         }
+    }
+}
+
 
         stage('Deploy (Helm/ArgoCD)') {
             when { expression { return false } } // enable later
