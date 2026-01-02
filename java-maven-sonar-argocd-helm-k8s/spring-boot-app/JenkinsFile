@@ -74,6 +74,36 @@ stage('Build and Push Docker Image') {
         }
     }
 }
+stage('Update Deployment File') {
+    environment {
+        GIT_REPO_NAME = "jenkins"
+        GIT_USER_NAME = "CieloCloud"
+        DEPLOYMENT_FILE = "java-maven-sonar-argocd-helm-k8s/spring-boot-app-manifests/deployment.yml"
+    }
+    steps {
+        withCredentials([string(credentialsId: 'github', variable: 'GITHUB_TOKEN')]) {
+            sh '''
+              echo "Configuring Git identity"
+              git config user.email "akashsuryawanshi251@gmail.com"
+              git config user.name "Akash Suryawanshi"
+
+              echo "Updating image tag in deployment file"
+              sed -i "s|image:.*|image: cielocloud/jenkins:${BUILD_NUMBER}|g" ${DEPLOYMENT_FILE}
+
+              echo "Showing updated deployment file"
+              grep image ${DEPLOYMENT_FILE}
+
+              echo "Committing changes"
+              git add ${DEPLOYMENT_FILE}
+              git commit -m "Update Docker image to version ${BUILD_NUMBER}"
+
+              echo "Pushing changes to GitHub"
+              git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME}.git HEAD:main
+            '''
+        }
+    }
+}
+
 
         stage('Deploy (Helm/ArgoCD)') {
             when { expression { return false } } // enable later
