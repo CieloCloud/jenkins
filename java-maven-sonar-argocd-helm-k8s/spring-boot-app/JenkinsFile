@@ -37,7 +37,7 @@ pipeline {
 stage('SonarQube Analysis') {
     agent {
         docker {
-            image 'maven:3.8.6-openjdk-11'
+            image 'maven:3.9.6-eclipse-temurin-17'
             args "--network=host -v ${MAVEN_CACHE}:/root/.m2"
         }
     }
@@ -52,6 +52,7 @@ stage('SonarQube Analysis') {
         }
     }
 }
+
 
         stage('Docker Build') {
             when { expression { return false } } // enable when you add Dockerfile
