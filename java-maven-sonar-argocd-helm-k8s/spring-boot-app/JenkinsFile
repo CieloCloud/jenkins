@@ -34,17 +34,17 @@ pipeline {
             }
         }
 
- stage('SonarQube') {
+stage('SonarQube Analysis') {
     agent {
         docker {
             image 'maven:3.8.6-openjdk-11'
-            args "-v ${MAVEN_CACHE}:/root/.m2"
+            args "--network=host -v ${MAVEN_CACHE}:/root/.m2"
         }
     }
     steps {
         dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
             sh '''
-              mvn verify sonar:sonar \
+              mvn sonar:sonar \
                 -Dsonar.projectKey=spring-boot-demo \
                 -Dsonar.host.url=http://localhost:9000 \
                 -Dsonar.login=${SONAR_TOKEN}
@@ -52,6 +52,7 @@ pipeline {
         }
     }
 }
+
         stage('Docker Build') {
             when { expression { return false } } // enable when you add Dockerfile
             steps {
