@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: spring-boot-app
-        image: cielocloud/jenkins:32
+        image: cielocloud/jenkins:33
         ports:
         - containerPort: 8080
