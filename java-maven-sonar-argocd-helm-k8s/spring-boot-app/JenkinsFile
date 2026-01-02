@@ -44,8 +44,9 @@ stage('SonarQube Analysis') {
     steps {
         dir('java-maven-sonar-argocd-helm-k8s/spring-boot-app') {
             sh '''
-              mvn sonar:sonar \
+              mvn org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
                 -Dsonar.projectKey=spring-boot-demo \
+                -Dsonar.projectName=spring-boot-demo \
                 -Dsonar.host.url=http://localhost:9000 \
                 -Dsonar.login=${SONAR_TOKEN}
             '''
