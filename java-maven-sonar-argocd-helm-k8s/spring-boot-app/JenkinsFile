@@ -38,9 +38,11 @@ stage('SonarQube Analysis') {
         }
     }
 }
+
 stage('Build and Push Docker Image') {
     environment {
         DOCKER_IMAGE = "cielocloud/jenkins:${BUILD_NUMBER}"
+        MAVEN_REPO = "${WORKSPACE}/.m2"
     }
     steps {
         withCredentials([usernamePassword(
@@ -54,8 +56,11 @@ stage('Build and Push Docker Image') {
 
               cd java-maven-sonar-argocd-helm-k8s/spring-boot-app
 
+              echo "Preparing Maven local repo"
+              mkdir -p ${MAVEN_REPO}
+
               echo "Building JAR on Jenkins node"
-              mvn clean package -DskipTests
+              mvn clean package -DskipTests -Dmaven.repo.local=${MAVEN_REPO}
 
               echo "Verify JAR exists"
               ls -ltr target/
@@ -69,7 +74,6 @@ stage('Build and Push Docker Image') {
         }
     }
 }
-
 
         stage('Deploy (Helm/ArgoCD)') {
             when { expression { return false } } // enable later
